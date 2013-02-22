@@ -48,10 +48,9 @@ def main(context, rows):
     savepoint = transaction.savepoint()
     try:
 
-        for row in rows:
+        for row in rows[1:]:
             
-            n, title, start, stop, area, note, other = row
-            tid = utils.normalizeString(title)
+            title, tid, start, stop, area, note, other = row
             if tid in periods:
                 continue
 
