@@ -5,8 +5,10 @@ from optparse import OptionParser
 import simplejson
 import sys
 
+from contentratings.storage import UserRatingStorage
 from DateTime import DateTime
 from Products.CMFCore.utils import getToolByName
+from zope.annotation.interfaces import IAnnotations
 
 from pleiades.bulkup import secure, setup_cmfuid
 
@@ -29,7 +31,18 @@ def is_high_quality(ob):
     return not(
         ob.getId().startswith(
         'darmc') or ob.getId().startswith(
-        'batlas') or ob.getId().startswith('undeterm') )
+        'batlas') or ob.getId().startswith(
+        'undeterm') or ob.getId().startswith(
+        'gane') )
+
+def rate(ob, user, val):
+    # Set the magnitude or rating of the place
+    annotations = IAnnotations(ob)
+    if 'contentratings.userrating.three_stars' not in annotations:
+        annotations[
+            'contentratings.userrating.three_stars'] = UserRatingStorage()
+    storage = annotations['contentratings.userrating.three_stars']
+    storage.rate(float(val), user)
 
 def main(context, gane_tree):
     
@@ -43,13 +56,15 @@ def main(context, gane_tree):
     savepoint = transaction.savepoint()
     try:
 
-        for k, v in gane_tree.items():
+        # Proper language codes
+
+        for pk, cluster in gane_tree.items():
             
-            if not k in v:
-                LOG.info("Skipping %s", k)
+            if not pk in cluster:
+                LOG.info("Skipping %s", pk)
                 continue
             
-            primary = v.pop(k)
+            primary = cluster.pop(pk)
 
             if "pleiades.stoa.org" in primary['placeURI']:
                 pass
@@ -108,7 +123,8 @@ def main(context, gane_tree):
                 LOG.info("Created gname GANE place %d", pid)
 
             # New name
-            for gid, gname in v.items():
+            for gid, gname, rating in [(pk, primary, 3)] + [
+                    (k, v, 2) for k, v in cluster.items() ]:
                 
                 # Add a name to the place
                 nameAttested = gname['title']
@@ -170,8 +186,13 @@ def main(context, gane_tree):
                 now = DateTime(datetime.datetime.now().isoformat())
                 ob.setModificationDate(now)
                 repo.save(ob, MESSAGE)
+                rate(ob, "fdeblauwe", rating)
+                rate(ob, "ekansa", rating)
+
                 #wftool.doActionFor(ob, action='submit')
                 #wftool.doActionFor(ob, action='publish')
+                
+                ob.reindexObject()
 
                 LOG.info("Created gname (Name) GANE %d", nid)
 
@@ -237,6 +258,7 @@ def main(context, gane_tree):
                 repo.save(ob, MESSAGE)
                 #wftool.doActionFor(ob, action='submit')
                 #wftool.doActionFor(ob, action='publish')
+                ob.reindexObject()
 
                 LOG.info("Created gname (Location) GANE %d", nid)
 
