@@ -25,10 +25,12 @@ MESSAGE = (
 "http://alexandriaarchive.org/projects/gane/." )
 
 def fmt_time_range(start, stop):
-    a = to_ad(int(start))
-    b = to_ad(int(stop))
-    start = abs(int(start))
-    stop = abs(int(stop))
+    start = int(start.replace(",", ""))
+    stop = int(stop.replace(",", ""))
+    a = to_ad(start)
+    b = to_ad(stop)
+    start = abs(start)
+    stop = abs(stop)
     if "BC" in a and "BC" in b:
         return u"%s\u2013%s BC" % (max(start, stop), min(start, stop))
     elif "AD" in a and "AD" in b:
