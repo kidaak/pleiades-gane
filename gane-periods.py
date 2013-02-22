@@ -56,6 +56,9 @@ def main(context, rows):
             if tid in periods:
                 continue
 
+            start = start.replace(",", "")
+            stop = stop.replace(",", "")
+
             title=u"%s (%s)" % (
                 unicode(title, "utf-8"),
                 fmt_time_range(start, stop) )
