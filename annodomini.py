@@ -1,5 +1,3 @@
-# coding=utf-8
-
 """annodomini: utilities for Anno Domini dates and ranges"""
 
 def to_ad(year):
@@ -30,10 +28,10 @@ def to_ad_range(start, stop):
 
     Example:
 
-      >>> print to_ad_range(-100, 100)
-      100 BC – AD 100
-      >>> print to_ad_range(100, 200)
-      AD 100–200
+      >>> to_ad_range(-100, 100)
+      u'100 BC \u2013 AD 100'
+      >>> to_ad_range(100, 200)
+      u'AD 100\u2013200'
     """
     if start == 0 or stop == 0:
         raise ValueError("There is no year 0 in the AD system")
