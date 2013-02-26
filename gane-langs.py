@@ -40,7 +40,8 @@ def main(context, rows):
             
             tavo, title, iso, ll, note = row
             lid = ll or iso
-            if lid in langs
+            if lid in langs:
+                LOG.info("Existing language %s", lid)
                 continue
             
             if ll:
@@ -53,7 +54,7 @@ def main(context, rows):
                 lid,
                 title=title,
                 description=(descr + u" (TAVO abbrev: %s)" % 
-                             tavo.decode("utf-8") )
+                             tavo.decode("utf-8") ))
             lang = langs[lid]
 
             now = DateTime(datetime.datetime.now().isoformat())

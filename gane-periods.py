@@ -86,8 +86,8 @@ def main(context, rows):
     transaction.commit()
 
 if __name__ == '__main__':
-    # Zopectl doesn't handle command line arguments well, necessitating quoting
-    # like this:
+    # Zopectl doesn't handle command line arguments well, necessitating
+    # quoting :wqlike this:
     #
     # $ instance run 'names.py -f names.csv -m "Set all descriptions from names-up2.csv again" -j description'
     

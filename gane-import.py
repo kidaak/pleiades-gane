@@ -1,7 +1,9 @@
 
+import csv
 import datetime
 import logging
 from optparse import OptionParser
+import os
 import simplejson
 import sys
 
@@ -44,13 +46,21 @@ def rate(ob, user, val):
     storage = annotations['contentratings.userrating.three_stars']
     storage.rate(float(val), user)
 
-def main(context, gane_tree):
+def main(context, gane_tree, period_map):
     
     catalog = getToolByName(context, 'portal_catalog')
     repo = getToolByName(context, 'portal_repository')
     wftool = getToolByName(context, 'portal_workflow')
     utils = getToolByName(context, 'plone_utils')
     places = context['places']
+
+    # Language adjustment
+    lang_map = {
+        'arbd': 'arbd',
+        'ethp': 'amh', 
+        'hbbb': 'hbo', 
+        'nabt': 'qhy-nor', 
+        'pmph': 'grc-pam' }
 
     import transaction
     savepoint = transaction.savepoint()
@@ -73,7 +83,7 @@ def main(context, gane_tree):
                 
                 gname = primary
                 title = gname['title']
-                description = gname['reference']['text']
+                description = "A place from the TAVO Index"
                 text = "GANE OBJECT %s" % gname['GANEid']
                 placeTypes = ['settlement']
                 creators = gname['creators'].split(", ")
@@ -90,7 +100,7 @@ def main(context, gane_tree):
                     text=text,
                     creators=creators,
                     contributors=contributors,
-                    initialProvenance='Pleiades'
+                    initialProvenance='TAVO Index'
                     )
                 place = places[pid]
             
@@ -103,8 +113,8 @@ def main(context, gane_tree):
 
                 for link in gname.get('externalURIs') or []:
                     citations.append(dict(
-                        identifier=link,
-                        range="Untitled GANE Link",
+                        identifier=link['uri'],
+                        range=link.get('title', "Untitled GANE Link"),
                         type="seeAlso",
                         ))
 
@@ -126,75 +136,84 @@ def main(context, gane_tree):
             for gid, gname, rating in [(pk, primary, 3)] + [
                     (k, v, 2) for k, v in cluster.items() ]:
                 
-                # Add a name to the place
-                nameAttested = gname['title']
-                title = (
-                    gname.get('nameTransliterated') or [nameAttested] )[0]
-                description = gname['reference']['text']
-                nameLanguage = "en"
-                nameTransliterated = ", ".join(
-                    gname.get('nameTransliterated') or [] )
-                text = "GANE OBJECT %s" % gname['GANEid']
-                creators = gname['creators'].split(", ")
-                contributors = gname['authors']
-                contributors = contributors.replace("F. Deblauwe", "fdeblauwe")
-                contributors = contributors.replace("E. Kansa", "ekansa")
-                contributors = contributors.split(", ")
+                for lang in (gname.get('title-languages') or
+                             [{'iso': None}]):
+                    # Add a name to the place
+                    nameAttested = gname['title']
+                    title = (gname.get('nameTransliterated') or
+                             [nameAttested] )[0]
+                    description = (
+                        "A place name from the TAVO Index (Vol. %s, pp. %s)" 
+                        % (gname['reference']['index-volume'],
+                           gname['reference']['index-page']))
+                    nameLanguage = lang_map.get(lang['iso'], lang['iso'])
+                    nameTransliterated = ", ".join(
+                        gname.get('nameTransliterated') or [] )
+                    text = "GANE OBJECT %s" % gname['GANEid']
+                    creators = gname['creators'].split(", ")
+                    contributors = gname['authors']
+                    contributors = contributors.replace(
+                        "F. Deblauwe", "fdeblauwe")
+                    contributors = contributors.replace(
+                        "E. Kansa", "ekansa")
+                    contributors = contributors.split(", ")
 
-                nid = place.invokeFactory(
-                    'Name',
-                    utils.normalizeString(title),
-                    title=title,
-                    description=description,
-                    text=text,
-                    nameAttested = nameAttested,
-                    nameLanguage = nameLanguage,
-                    nameTransliterated=nameTransliterated,
-                    nameType="geographic",
-                    creators=creators,
-                    contributors=contributors,
-                    initialProvenance='Pleiades'
-                    )
-                ob = place[nid]
+                    nid = place.invokeFactory(
+                        'Name',
+                        utils.normalizeString(title),
+                        title=title,
+                        description=description,
+                        text=text,
+                        nameAttested = nameAttested,
+                        nameLanguage = nameLanguage,
+                        nameTransliterated=nameTransliterated,
+                        nameType="geographic",
+                        creators=creators,
+                        contributors=contributors,
+                        initialProvenance='TAVO Index')
+                    ob = place[nid]
 
-                atts = [dict(
-                    confidence='confident', 
-                    timePeriod=utils.normalizeString(p) 
-                    ) for p in gname.get('periods', []) ]
-                field = ob.getField('attestations')
-                field.resize(len(atts), ob)
-                ob.setAttestations(atts)
+                    atts = [dict(
+                        confidence='confident', 
+                        timePeriod=period_map[p] # utils.normalizeString(p) 
+                        ) for p in gname.get('periods', [])]
+                    field = ob.getField('attestations')
+                    field.resize(len(atts), ob)
+                    ob.setAttestations(atts)
 
-                citations= [dict(
-                    identifier="http://www.worldcat.org/oclc/32624915",
-                    range="TAVO Index (Vol. %s, pp. %s)" % (
-                        gname['reference']['index-volume'],
-                        gname['reference']['index-page'] ),
-                    type="cites" )]
+                    citations= [dict(
+                        identifier="http://www.worldcat.org/oclc/32624915",
+                        range="TAVO Index (Vol. %s, pp. %s)" % (
+                            gname['reference']['index-volume'],
+                            gname['reference']['index-page']),
+                        type="cites")]
 
-                for link in gname.get('externalURIs') or []:
-                    citations.append(dict(
-                        identifier=link,
-                        range="Untitled GANE Link",
-                        type="seeAlso",
-                        ))
+                    if gid != pk:
+                        # Skip external links that have already been saved
+                        # on the parent place
 
-                field = ob.getField('referenceCitations')
-                field.resize(len(citations), ob)
-                ob.setReferenceCitations(citations)
+                        for link in gname.get('externalURIs') or []:
+                            citations.append(dict(
+                                identifier=link['uri'],
+                                range=link.get('title', "Untitled GANE Link"),
+                                type="seeAlso"))
 
-                now = DateTime(datetime.datetime.now().isoformat())
-                ob.setModificationDate(now)
-                repo.save(ob, MESSAGE)
-                rate(ob, "fdeblauwe", rating)
-                rate(ob, "ekansa", rating)
+                        field = ob.getField('referenceCitations')
+                        field.resize(len(citations), ob)
+                        ob.setReferenceCitations(citations)
 
-                #wftool.doActionFor(ob, action='submit')
-                #wftool.doActionFor(ob, action='publish')
+                    now = DateTime(datetime.datetime.now().isoformat())
+                    ob.setModificationDate(now)
+                    repo.save(ob, MESSAGE)
+                    rate(ob, "fdeblauwe", rating)
+                    rate(ob, "ekansa", rating)
+
+                    #wftool.doActionFor(ob, action='submit')
+                    #wftool.doActionFor(ob, action='publish')
                 
-                ob.reindexObject()
+                    ob.reindexObject()
 
-                LOG.info("Created gname (Name) GANE %d", nid)
+                    LOG.info("Created gname (Name) GANE %d", nid)
 
                 if filter(is_high_quality, place.getLocations()):
                     # No need for GANE locations
@@ -211,16 +230,17 @@ def main(context, gane_tree):
                     'Location',
                     'gane-location-%s' % gname['GANEid'],
                     title="GANE Location %s" % gname['GANEid'],
-                    description=description,
+                    description="Approximate location from the TAVO index",
                     text=text,
                     featureType=placeTypes,
                     geometry=geometry,
                     creators=creators,
                     contributors=contributors,
-                    initialProvenance='Pleiades'
+                    initialProvenance='TAVO Index'
                     )
                 ob = place[lid]
                 
+                # TODO: accuracy assessment
                 # positional accuracy
                 #geostatus = row.get('GEOSTATUS').strip() or 'C'
                 #mdid = "darmc-%s" % geostatus.lower()
@@ -229,7 +249,7 @@ def main(context, gane_tree):
 
                 atts = [dict(
                     confidence='confident', 
-                    timePeriod=utils.normalizeString(p) 
+                    timePeriod=period_map[p] # utils.normalizeString(p) 
                     ) for p in gname.get('periods', []) ]
                 field = ob.getField('attestations')
                 field.resize(len(atts), ob)
@@ -242,16 +262,19 @@ def main(context, gane_tree):
                         gname['reference']['index-page'] ),
                     type="cites" )]
 
-                for link in gname.get('externalURIs') or []:
-                    citations.append(dict(
-                        identifier=link,
-                        range="Untitled GANE Link",
-                        type="seeAlso",
-                        ))
+                if gid != pk:
+                    # Skip external links that have already been saved
+                    # on the parent place
 
-                field = ob.getField('referenceCitations')
-                field.resize(len(citations), ob)
-                ob.setReferenceCitations(citations)
+                    for link in gname.get('externalURIs') or []:
+                        citations.append(dict(
+                            identifier=link['uri'],
+                            range=link.get('title', "Untitled GANE Link"),
+                            type="seeAlso"))
+
+                    field = ob.getField('referenceCitations')
+                    field.resize(len(citations), ob)
+                    ob.setReferenceCitations(citations)
 
                 now = DateTime(datetime.datetime.now().isoformat())
                 ob.setModificationDate(now)
@@ -260,7 +283,7 @@ def main(context, gane_tree):
                 #wftool.doActionFor(ob, action='publish')
                 ob.reindexObject()
 
-                LOG.info("Created gname (Location) GANE %d", nid)
+                LOG.info("Created gname (Location) GANE %s", nid)
 
             place.setModificationDate(now)
             repo.save(place, MESSAGE)
@@ -289,9 +312,22 @@ if __name__ == '__main__':
     opts, args = parser.parse_args(sys.argv[1:])
     filename = opts.filename
     data = simplejson.loads(open(filename, 'rb').read())
+
+    # Mapping of TAVO period names to keys
+    path = os.path.sep.join(
+        [os.path.dirname(sys.argv[0]), "time-periods.csv"])
+    f = open(os.path.abspath(path))
+    rows = list(csv.reader(f))[1:]
+    f.close()
+    period_map = dict([
+        (title, tid) for title, tid, start, stop, area, note, other 
+        in rows ])
+
     site = app['plone']
     setup_cmfuid(site)
     secure(site, opts.user or 'admin')
-    main(site, data)
+    
+    main(site, data, period_map)
+
     app._p_jar.sync()
 
