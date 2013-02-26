@@ -47,7 +47,7 @@ def main(context, rows):
             if ll:
                 descr = u"From LINGUIST list"
             else:
-                descr = u"From ISO 639-x"
+                descr = u"From ISO 639-3"
 
             lid = langs.invokeFactory(
                 'PleiadesVocabularyTerm',
