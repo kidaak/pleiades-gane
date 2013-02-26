@@ -139,16 +139,14 @@ def main(context, gane_tree, period_map):
                 for lang in (gname.get('title-languages') or
                              [{'iso': None}]):
                     # Add a name to the place
-                    nameAttested = gname['title']
-                    title = (gname.get('nameTransliterated') or
-                             [nameAttested] )[0]
+                    title = gname['title']
                     description = (
                         "A place name from the TAVO Index (Vol. %s, pp. %s)" 
                         % (gname['reference']['index-volume'],
                            gname['reference']['index-page']))
                     nameLanguage = lang_map.get(lang['iso'], lang['iso'])
-                    nameTransliterated = ", ".join(
-                        gname.get('nameTransliterated') or [] )
+                    nameTransliterated = u", ".join([title] + 
+                        (gname.get('nameTransliterated') or []))
                     text = "GANE OBJECT %s" % gname['GANEid']
                     creators = gname['creators'].split(", ")
                     contributors = gname['authors']
@@ -164,8 +162,8 @@ def main(context, gane_tree, period_map):
                         title=title,
                         description=description,
                         text=text,
-                        nameAttested = nameAttested,
-                        nameLanguage = nameLanguage,
+                        nameAttested=None,
+                        nameLanguage=nameLanguage,
                         nameTransliterated=nameTransliterated,
                         nameType="geographic",
                         creators=creators,
