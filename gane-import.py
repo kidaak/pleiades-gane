@@ -112,6 +112,10 @@ def main(context, gane_tree, period_map):
                     type="cites" )]
 
                 for link in gname.get('externalURIs') or []:
+                    if "wikipedia" in link['uri']:
+                        label = 'Wikipedia "%s."' % link.get('title')
+                    else:
+                        label = link.get('title', "Untitled GANE Link")
                     citations.append(dict(
                         identifier=link['uri'],
                         range=link.get('title', "Untitled GANE Link"),
@@ -138,6 +142,10 @@ def main(context, gane_tree, period_map):
                 
                 for lang in (gname.get('title-languages') or
                              [{'iso': None}]):
+
+                    if not gname.get('nameTransliterated'):
+                        continue
+
                     # Add a name to the place
                     title = gname['title']
                     description = (
