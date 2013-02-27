@@ -118,7 +118,7 @@ def main(context, gane_tree, period_map):
                         label = link.get('title', "Untitled GANE Link")
                     citations.append(dict(
                         identifier=link['uri'],
-                        range=link.get('title', "Untitled GANE Link"),
+                        range=label,
                         type="seeAlso",
                         ))
 
@@ -199,10 +199,14 @@ def main(context, gane_tree, period_map):
                         # on the parent place
 
                         for link in gname.get('externalURIs') or []:
-                            citations.append(dict(
-                                identifier=link['uri'],
-                                range=link.get('title', "Untitled GANE Link"),
-                                type="seeAlso"))
+                            if "wikipedia" in link['uri']:
+                                label = 'Wikipedia "%s."' % link.get('title')
+                            else:
+                                label = link.get('title', "Untitled GANE Link")
+                        citations.append(dict(
+                            identifier=link['uri'],
+                            range=label,
+                            type="seeAlso"))
 
                         field = ob.getField('referenceCitations')
                         field.resize(len(citations), ob)
@@ -273,9 +277,13 @@ def main(context, gane_tree, period_map):
                     # on the parent place
 
                     for link in gname.get('externalURIs') or []:
+                        if "wikipedia" in link['uri']:
+                            label = 'Wikipedia "%s."' % link.get('title')
+                        else:
+                            label = link.get('title', "Untitled GANE Link")
                         citations.append(dict(
                             identifier=link['uri'],
-                            range=link.get('title', "Untitled GANE Link"),
+                            range=label,
                             type="seeAlso"))
 
                     field = ob.getField('referenceCitations')
