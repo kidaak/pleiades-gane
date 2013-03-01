@@ -1,6 +1,7 @@
 
 import csv
 import datetime
+from itertools import chain
 import logging
 from optparse import OptionParser
 import os
@@ -36,6 +37,13 @@ def is_high_quality(ob):
         'batlas') or ob.getId().startswith(
         'undeterm') or ob.getId().startswith(
         'gane') )
+
+def get_accuracy(name):
+    main_map = name.get('main-map')
+    if main_map:
+        return main_map.get('accuracy')
+    else:
+        return None
 
 def rate(ob, user, val):
     # Set the magnitude or rating of the place
@@ -106,7 +114,7 @@ def main(context, gane_tree, period_map):
             
                 citations= [dict(
                     identifier="http://www.worldcat.org/oclc/32624915",
-                    range="TAVO Index (Vol. %s, pp. %s)" % (
+                    range="TAVO Index (Vol. %s, p. %s)" % (
                         gname['reference']['index-volume'],
                         gname['reference']['index-page'] ),
                     type="cites" )]
@@ -149,7 +157,7 @@ def main(context, gane_tree, period_map):
                     # Add a name to the place
                     title = gname['title']
                     description = (
-                        "A place name from the TAVO Index (Vol. %s, pp. %s)" 
+                        "A place name from the TAVO Index (Vol. %s, p. %s)" 
                         % (gname['reference']['index-volume'],
                            gname['reference']['index-page']))
                     nameLanguage = lang_map.get(lang['iso'], lang['iso'])
@@ -189,7 +197,7 @@ def main(context, gane_tree, period_map):
 
                     citations= [dict(
                         identifier="http://www.worldcat.org/oclc/32624915",
-                        range="TAVO Index (Vol. %s, pp. %s)" % (
+                        range="TAVO Index (Vol. %s, p. %s)" % (
                             gname['reference']['index-volume'],
                             gname['reference']['index-page']),
                         type="cites")]
@@ -225,79 +233,97 @@ def main(context, gane_tree, period_map):
 
                     LOG.info("Created gname (Name) GANE %d", nid)
 
-                if filter(is_high_quality, place.getLocations()):
-                    # No need for GANE locations
-                    continue
+            # Locations
 
-                extent = gname.get('extent')
-                if not extent:
-                    continue
+            if filter(is_high_quality, place.getLocations()):
+                # No need for GANE locations
+                continue
+
+            # Let's take the most accurate coordinates and roll all the
+            # periods into one Location.
+            points = sorted(filter(
+                        lambda t: t[0] in '01234567' and t[2].get('extent'),
+                        [(get_accuracy(v), k, v) for 
+                            k, v in [(pk, primary)] + cluster.items()] ))
+            if len(points) < 1:
+                continue
+
+            all_periods = set(
+                chain(*[n['periods'] for n in [primary] + cluster.values()]))
+
+            accuracy, gid, gname = points[0]
+            rating = 1
+            if accuracy == '0':
+                accuracy = '1'
+
+            extent = gname.get('extent')
+            if not extent:
+                continue
                 
-                geometry = "%s:%s" % (extent['type'], extent['coordinates'])
-                placeTypes = ['settlement']
+            geometry = "%s:%s" % (extent['type'], extent['coordinates'])
+            placeTypes = ['settlement']
 
-                lid = place.invokeFactory(
-                    'Location',
-                    'gane-location-%s' % gname['GANEid'],
-                    title="GANE Location %s" % gname['GANEid'],
-                    description="Approximate location from the TAVO index",
-                    text=text,
-                    featureType=placeTypes,
-                    geometry=geometry,
-                    creators=creators,
-                    contributors=contributors,
-                    initialProvenance='TAVO Index'
-                    )
-                ob = place[lid]
+            lid = place.invokeFactory(
+                'Location',
+                'gane-location-%s' % gname['GANEid'],
+                title="GANE Location %s" % gname['GANEid'],
+                description="Approximate location from the TAVO index",
+                text=text,
+                featureType=placeTypes,
+                geometry=geometry,
+                creators=creators,
+                contributors=contributors,
+                initialProvenance='TAVO Index'
+                )
+            ob = place[lid]
                 
-                # TODO: accuracy assessment
-                # positional accuracy
-                #geostatus = row.get('GEOSTATUS').strip() or 'C'
-                #mdid = "darmc-%s" % geostatus.lower()
-                #metadataDoc = context['features']['metadata'][mdid]
-                #location.addReference(metadataDoc, 'location_accuracy')
+            # TODO: accuracy assessment
+            # positional accuracy
+            mdid = "tavo-%s" % accuracy
+            metadataDoc = context['features']['metadata'][mdid]
+            ob.addReference(metadataDoc, 'location_accuracy')
 
-                atts = [dict(
-                    confidence='confident', 
-                    timePeriod=period_map[p] # utils.normalizeString(p) 
-                    ) for p in gname.get('periods', []) ]
-                field = ob.getField('attestations')
-                field.resize(len(atts), ob)
-                ob.setAttestations(atts)
+            atts = [dict(
+                confidence='confident', 
+                timePeriod=period_map[p] # utils.normalizeString(p) 
+                ) for p in all_periods ]
+            field = ob.getField('attestations')
+            field.resize(len(atts), ob)
+            ob.setAttestations(atts)
 
-                citations= [dict(
-                    identifier="http://www.worldcat.org/oclc/32624915",
-                    range="TAVO Index (Vol. %s, pp. %s)" % (
-                        gname['reference']['index-volume'],
-                        gname['reference']['index-page'] ),
-                    type="cites" )]
+            citations= [dict(
+                identifier="http://www.worldcat.org/oclc/32624915",
+                range="TAVO Index (Vol. %s, p. %s)" % (
+                    gname['reference']['index-volume'],
+                    gname['reference']['index-page'] ),
+                type="cites" )]
 
-                if gid != pk:
-                    # Skip external links that have already been saved
-                    # on the parent place
+            if gid != pk:
+                # Skip external links that have already been saved
+                # on the parent place
 
-                    for link in gname.get('externalURIs') or []:
-                        if "wikipedia" in link['uri']:
-                            label = 'Wikipedia "%s."' % link.get('title')
-                        else:
-                            label = link.get('title', "Untitled GANE Link")
-                        citations.append(dict(
-                            identifier=link['uri'],
-                            range=label,
-                            type="seeAlso"))
+                for link in gname.get('externalURIs') or []:
+                    if "wikipedia" in link['uri']:
+                        label = 'Wikipedia "%s."' % link.get('title')
+                    else:
+                        label = link.get('title', "Untitled GANE Link")
+                    citations.append(dict(
+                        identifier=link['uri'],
+                        range=label,
+                        type="seeAlso"))
 
-                    field = ob.getField('referenceCitations')
-                    field.resize(len(citations), ob)
-                    ob.setReferenceCitations(citations)
+                field = ob.getField('referenceCitations')
+                field.resize(len(citations), ob)
+                ob.setReferenceCitations(citations)
 
-                now = DateTime(datetime.datetime.now().isoformat())
-                ob.setModificationDate(now)
-                repo.save(ob, MESSAGE)
-                #wftool.doActionFor(ob, action='submit')
-                #wftool.doActionFor(ob, action='publish')
-                ob.reindexObject()
+            now = DateTime(datetime.datetime.now().isoformat())
+            ob.setModificationDate(now)
+            repo.save(ob, MESSAGE)
+            #wftool.doActionFor(ob, action='submit')
+            #wftool.doActionFor(ob, action='publish')
+            ob.reindexObject()
 
-                LOG.info("Created gname (Location) GANE %s", nid)
+            LOG.info("Created gname (Location) GANE %s", nid)
 
             place.setModificationDate(now)
             repo.save(place, MESSAGE)
