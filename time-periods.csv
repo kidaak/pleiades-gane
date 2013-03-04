@@ -33,7 +33,7 @@ Middle Bronze Age Iran,middle-bronze-age-iran,"-2,000","-1,500",Iran,,
 Middle Bronze Age Southern Levant,middle-bronze-age-southern-levant,"-2,000","-1,400",southern Levant,,
 2nd Millennium BC Egypt,2nd-millennium-bc-egypt,"-2,000","-1,000",Egypt,,Middle Kingdom Egypt + Second Intermediate Period Egypt + New Kingdom Egypt
 2nd Millennium BC Levant,2nd-millennium-bc-levant,"-2,000","-1,000",Levant,MBA Levant-LBA Levant-Iron Age I Levant [not sure as these are all taken from southern Levant periodisation],
-Middle Bronze-Early Iron Age Iran,middle-bronze-early-iron-age-iran,"-2,000",-650,Iran,,Middle Bronze Age + Late Bronze Age Iran + Early Iron Age Iran
+Middle Bronze-Iron Age Iran,middle-bronze-early-iron-age-iran,"-2,000",-540,Iran,,Middle Bronze Age + Late Bronze Age Iran + Early Iron Age Iran
 Middle Bronze Age Anatolia,middle-bronze-age-anatolia,"-1,750","-1,450",Anatolia,,
 Old Hittite Anatolia,old-hittite-anatolia,"-1,650","-1,450",Anatolia,Old-Middle Kingdom Hittite,
 Second Intermediate Period Egypt,second-intermediate-period-egypt,"-1,640","-1,548",Egypt,,
@@ -46,6 +46,7 @@ Late Bronze Age Southern Levant,late-bronze-age-southern-levant,"-1,400","-1,200
 Egyptian/Hittite Levant,egyptian-hittite-levant,"-1,344","-1,212",Levant,,
 Early Iron Age Anatolia,early-iron-age-anatolia,"-1,200",-700,Anatolia,incl. Mitanni,
 Neo-Hittite Northern Levant,neo-hittite-northern-levant,"-1,200",-700,northern Levant,Syro-Hittite Northern Levant,
+Iron Age Southern Levant,iron-age-southern-levant, "-1,200",-550,southern Levant,,
 Third Intermediate Period Egypt,third-intermediate-period-egypt,"-1,086",-664,Egypt,,
 Early Iron Age Iran,early-iron-age-iran,"-1,000",-650,Iran,Pre-Classical Antiquity,
 Early Geometric (Greek),early-geometric,-900,-850,Aegean,,
