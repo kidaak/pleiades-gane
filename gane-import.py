@@ -5,15 +5,18 @@ from itertools import chain
 import logging
 from optparse import OptionParser
 import os
+import re
 import simplejson
 import sys
 
 from contentratings.storage import UserRatingStorage
 from DateTime import DateTime
 from Products.CMFCore.utils import getToolByName
+from quadtree import Quadtree
 from zope.annotation.interfaces import IAnnotations
 
 from pleiades.bulkup import secure, setup_cmfuid
+from pleiades.capgrids import box
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
@@ -53,6 +56,27 @@ def rate(ob, user, val):
             'contentratings.userrating.three_stars'] = UserRatingStorage()
     storage = annotations['contentratings.userrating.three_stars']
     storage.rate(float(val), user)
+
+def capgrids_tree():
+    tree = Quadtree((-180, -90, 180, 90))
+    keys = {}
+    i = 0
+    for mapid in range(1, 100):
+        mapid = str(mapid)
+        for letter in 'abcdefghijklmnop':
+            for num in range(1, 10):
+                try:
+                    b = box(mapid, letter + str(num))
+                except IndexError:
+                    continue
+                v = "%s/%s" % (mapid, (letter + str(num)).capitalize())
+                if v not in keys:
+                    tree.add(i, b)
+                    keys[i] = v
+                    i += 1
+    return keys, tree
+
+cap_keys, cap_tree = capgrids_tree()
 
 def main(context, gane_tree, period_map):
     
@@ -110,16 +134,21 @@ def main(context, gane_tree, period_map):
         for pk, cluster in gane_tree.items():
             
             if not pk in cluster:
-                LOG.info("Skipping %s", pk)
+                LOG.warn("Primary not found, skipping cluster, Pk: %s", pk)
                 continue
             
             primary = cluster.pop(pk)
+            pid = primary['pid']
 
-            if "pleiades.stoa.org" in primary['placeURI']:
-                pass
+            LOG.info("Importing cluster, Pk: %s, Pid: %s, num items: %s", pk, pid, len(cluster))
+
+            if pid:
+                place = places[pid]
+                action = 'append'
+                
+                LOG.info("Pid: %s, action: %s", pid, action)
 
             elif "gap.alexandriaarchive.org" in primary['placeURI']:
-                
                 gname = primary
                 title = gname['title']
                 description = "A place from the TAVO Index"
@@ -142,6 +171,7 @@ def main(context, gane_tree, period_map):
                     initialProvenance='TAVO Index'
                     )
                 place = places[pid]
+                action = 'create'
             
                 citations= [dict(
                     identifier="http://www.worldcat.org/oclc/32624915",
@@ -173,17 +203,19 @@ def main(context, gane_tree, period_map):
                 #wftool.doActionFor(location, action='publish')
                 place.reindexObject()
                 
-                LOG.info("Created gname GANE place %d", pid)
+                LOG.info("Created gname GANE place %s", pid)
 
             # New name
             for gid, gname, rating in [(pk, primary, 3)] + [
                     (k, v, 2) for k, v in cluster.items() ]:
                 
+                LOG.info("Naming, gid: %s, gname: %s, rating: %s", gid, gname, rating)
+
                 for lang in (gname.get('title-languages') or
                              [{'iso': None}]):
 
                     if not gname.get('nameTransliterated'):
-                        continue
+                        LOG.warn("No transliteration")
 
                     # Add a name to the place
                     title = gname['title']
@@ -202,10 +234,23 @@ def main(context, gane_tree, period_map):
                     contributors = contributors.replace(
                         "E. Kansa", "ekansa")
                     contributors = contributors.split(", ")
+                    
+                    # Determine a good id for the name
+                    nid = utils.normalizeString(title)
+                    if len(gname.get('title-languages', None) or []) > 1 and lang['iso']:
+                        nid = nid + "-" + lang['iso'].lower()
 
+                    while nid in place.contentIds():
+                        match = re.search('-(\d+)$', nid)
+                        if match:
+                            num = int(match.group(1))
+                            nid = re.sub('\d+$', str(num+1), nid)
+                        else:
+                            nid = nid + "-1"
+                    
                     nid = place.invokeFactory(
                         'Name',
-                        utils.normalizeString(title),
+                        nid,
                         title=title,
                         description=description,
                         text=text,
@@ -221,7 +266,7 @@ def main(context, gane_tree, period_map):
                     atts = [dict(
                         confidence='confident', 
                         timePeriod=period_map[p] # utils.normalizeString(p) 
-                        ) for p in gname.get('periods', [])]
+                        ) for p in gname.get('periods', []) if p in period_map]
                     field = ob.getField('attestations')
                     field.resize(len(atts), ob)
                     ob.setAttestations(atts)
@@ -242,10 +287,10 @@ def main(context, gane_tree, period_map):
                                 label = 'Wikipedia "%s."' % link.get('title')
                             else:
                                 label = link.get('title', "Untitled GANE Link")
-                        citations.append(dict(
-                            identifier=link['uri'],
-                            range=label,
-                            type="seeAlso"))
+                            citations.append(dict(
+                                identifier=link['uri'],
+                                range=label,
+                                type="seeAlso"))
 
                         field = ob.getField('referenceCitations')
                         field.resize(len(citations), ob)
@@ -262,12 +307,15 @@ def main(context, gane_tree, period_map):
                 
                     ob.reindexObject()
 
-                    LOG.info("Created gname (Name) GANE %d", nid)
+                    LOG.info("Created Name. GANE id: %s, Pleiades id: %s", gid, nid)
 
             # Locations
 
+            LOG.info("Locating...")
+
             if filter(is_high_quality, place.getLocations()):
                 # No need for GANE locations
+                LOG.info("Place has high quality location(s), continuing...")
                 continue
 
             # Let's take the most accurate coordinates and roll all the
@@ -277,21 +325,38 @@ def main(context, gane_tree, period_map):
                         [(get_accuracy(v), k, v) for 
                             k, v in [(pk, primary)] + cluster.items()] ))
             if len(points) < 1:
+                LOG.info("No accurate location found, continuing...")
                 continue
 
             all_periods = set(
                 chain(*[n['periods'] for n in [primary] + cluster.values()]))
 
             accuracy, gid, gname = points[0]
+
+            text = "GANE OBJECT %s\nMap: %s\nCorner Coordinates: %s\n" % (
+                gname['GANEid'],
+                gname['main-map'].get('map'),
+                gname.get('extent', {'coordinates': None}).get('coordinates'))
+
             rating = 1
             if accuracy == '0':
                 accuracy = '1'
 
             extent = gname.get('extent')
             if not extent:
+                LOG.info("No extent found, continuing...")
                 continue
                 
-            geometry = "%s:%s" % (extent['type'], extent['coordinates'])
+            # geometry = "%s:%s" % (extent['type'], extent['coordinates'])
+            
+            # find the capgrid containing this point
+            b = extent['coordinates']
+            b[0] += 0.05
+            b[1] += 0.05
+            b = b + b 
+            
+            hits = list(cap_tree.likely_intersection(b))
+
             placeTypes = ['settlement']
 
             lid = place.invokeFactory(
@@ -301,13 +366,31 @@ def main(context, gane_tree, period_map):
                 description="Approximate location from the TAVO index",
                 text=text,
                 featureType=placeTypes,
-                geometry=geometry,
+                # geometry=geometry,
                 creators=creators,
                 contributors=contributors,
                 initialProvenance='TAVO Index'
                 )
             ob = place[lid]
-                
+            
+            if hits:
+                area = 1000000.0
+                val = None
+                for hit in hits:
+                    mapgrid = cap_keys[hit]
+                    mapnum, grid = mapgrid.split("/")
+                    b = box(mapnum, grid)
+                    hit_area = (b[2]-b[0])*(b[3]-b[1])
+                    x, y = extent['coordinates']
+                    if b[0] <= x <= b[2] and b[1] <= y <= b[3] and hit_area < area:
+                        area = hit_area
+                        val = mapgrid
+                if val:
+                    LOG.info("Setting grid location of %s/%s: %s", pid, lid, val)
+                    ob.setLocation('http://atlantides.org/capgrids/' + val)
+                else:
+                    LOG.warn("Grid location of %s/%s unset", pid, lid)
+
             # TODO: accuracy assessment
             # positional accuracy
             mdid = "tavo-%s" % accuracy
@@ -317,7 +400,7 @@ def main(context, gane_tree, period_map):
             atts = [dict(
                 confidence='confident', 
                 timePeriod=period_map[p] # utils.normalizeString(p) 
-                ) for p in all_periods ]
+                ) for p in all_periods if p in period_map]
             field = ob.getField('attestations')
             field.resize(len(atts), ob)
             ob.setAttestations(atts)
@@ -361,8 +444,10 @@ def main(context, gane_tree, period_map):
             place.reindexObject()
 
     except Exception, e:
-        savepoint.rollback()
-        LOG.error("Rolled back after catching exception: %s" % e)
+        raise
+        
+        #savepoint.rollback()
+        #LOG.error("Rolled back after catching exception: %s" % e)
  
     transaction.commit()
 
@@ -401,4 +486,5 @@ if __name__ == '__main__':
     main(site, data, period_map)
 
     app._p_jar.sync()
+
 

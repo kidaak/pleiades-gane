@@ -1,0 +1,476 @@
+{
+  "62752": {
+    "62752": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1704)", 
+        "index-page": 1704, 
+        "index-volume": 3
+      }, 
+      "title": "Tp\u0142is", 
+      "maxDate": 1500, 
+      "title-languages": [
+        {
+          "iso": "hye", 
+          "language": "Armenian", 
+          "iso_stand": true
+        }
+      ], 
+      "pid": "863903", 
+      "GANEid": 62752, 
+      "periods": [
+        "Late Antique", 
+        "Proto-Byzantine", 
+        "Persian-Medieval Caucasus", 
+        "Early Medieval Caucasus"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.4, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": [
+        "Tplis", 
+        "Tplis"
+      ], 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BVIII4", 
+        "accuracy": "2"
+      }, 
+      "minDate": 300
+    }
+  }, 
+  "57345": {
+    "57345": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1561)", 
+        "index-page": 1561, 
+        "index-volume": 3
+      }, 
+      "title": "Tafl\u012bs", 
+      "maxDate": 750, 
+      "title-languages": false, 
+      "pid": "863903", 
+      "GANEid": 57345, 
+      "periods": [
+        "Caliphate-Umayyad Middle East"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.3, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": false, 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BVII3.1", 
+        "accuracy": "4"
+      }, 
+      "minDate": 632
+    }
+  }, 
+  "62146": {
+    "62146": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1688)", 
+        "index-page": 1688, 
+        "index-volume": 3
+      }, 
+      "title": "Tiflis", 
+      "maxDate": 2000, 
+      "title-languages": [
+        {
+          "iso": "ota", 
+          "language": "Ottoman Turkish", 
+          "iso_stand": true
+        }, 
+        {
+          "iso": "rus", 
+          "language": "Russian", 
+          "iso_stand": true
+        }, 
+        {
+          "iso": "deu", 
+          "language": "German", 
+          "iso_stand": true
+        }
+      ], 
+      "pid": "863903", 
+      "GANEid": 62146, 
+      "periods": [
+        "Proto-Byzantine/Sasanian Middle East", 
+        "Early Medieval Caucasus", 
+        "Early Ottoman Empire", 
+        "Perso-Ottoman-Russian Caucasus", 
+        "Safavid Middle East", 
+        "Late Ottoman Empire", 
+        "Ottoman Decline-Mandate Middle East", 
+        "Modern Middle East"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.4, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": false, 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BX9", 
+        "accuracy": "2"
+      }, 
+      "minDate": 0
+    }
+  }, 
+  "62148": {
+    "62148": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1688)", 
+        "index-page": 1688, 
+        "index-volume": 3
+      }, 
+      "title": "Tifl\u012bs", 
+      "maxDate": 1918, 
+      "title-languages": [
+        {
+          "iso": "arb", 
+          "language": "[Standard Modern] Arabic", 
+          "iso_stand": true
+        }
+      ], 
+      "pid": "863903", 
+      "GANEid": 62148, 
+      "periods": [
+        "Persian-Medieval Caucasus", 
+        "Caliphate-Umayyad Middle East", 
+        "Khwarezmian Middle East", 
+        "Mongol Middle East", 
+        "Ilkhanate Middle East", 
+        "Timurid Middle East", 
+        "Late Ottoman Empire"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.3, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": [
+        "Tiflis", 
+        "Taflis"
+      ], 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BVII3.1", 
+        "accuracy": "4"
+      }, 
+      "minDate": 600
+    }
+  }, 
+  "62753": {
+    "62753": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1704)", 
+        "index-page": 1704, 
+        "index-volume": 3
+      }, 
+      "title": "\u1e6cp\u0323\u0142is", 
+      "maxDate": 1500, 
+      "title-languages": false, 
+      "pid": "863903", 
+      "GANEid": 62753, 
+      "periods": [
+        "Persian-Medieval Caucasus"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.5, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": false, 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BVIII4", 
+        "accuracy": "2"
+      }, 
+      "minDate": 600
+    }
+  }, 
+  "62751": {
+    "62751": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1704)", 
+        "index-page": 1704, 
+        "index-volume": 3
+      }, 
+      "title": "Tp\u0323lis", 
+      "maxDate": 650, 
+      "title-languages": false, 
+      "pid": "863903", 
+      "GANEid": 62751, 
+      "periods": [
+        "Proto-Byzantine"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.3, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": false, 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BVI6", 
+        "accuracy": "4"
+      }, 
+      "minDate": 500
+    }
+  }, 
+  "62746": {
+    "62746": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1704)", 
+        "index-page": 1704, 
+        "index-volume": 3
+      }, 
+      "title": "Tp\u1e2bis", 
+      "maxDate": 1200, 
+      "title-languages": false, 
+      "pid": "863903", 
+      "GANEid": 62746, 
+      "periods": [
+        "Late Antique", 
+        "Early Medieval Caucasus"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.4, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": false, 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BVII16", 
+        "accuracy": "2"
+      }, 
+      "minDate": 300
+    }
+  }, 
+  "62747": {
+    "62747": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1704)", 
+        "index-page": 1704, 
+        "index-volume": 3
+      }, 
+      "title": "Tp\u1e96is", 
+      "maxDate": 1200, 
+      "title-languages": [
+        {
+          "iso": "hye", 
+          "language": "Armenian", 
+          "iso_stand": true
+        }
+      ], 
+      "pid": "863903", 
+      "GANEid": 62747, 
+      "periods": [
+        "Late Antique", 
+        "Early Medieval Caucasus"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.4, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": [
+        "Tp\u1e2bis", 
+        "Tpkhis"
+      ], 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BVII16", 
+        "accuracy": "2"
+      }, 
+      "minDate": 300
+    }
+  }, 
+  "61213": {
+    "61213": {
+      "externalURIs": [
+        {
+          "uri": "http://en.wikipedia.org/wiki/Tbilisi", 
+          "title": "Tbilisi"
+        }
+      ], 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1662)", 
+        "index-page": 1662, 
+        "index-volume": 3
+      }, 
+      "title": "Tbilisi", 
+      "maxDate": 2000, 
+      "title-languages": [
+        {
+          "iso": "kat", 
+          "language": "Georgian", 
+          "iso_stand": true
+        }
+      ], 
+      "pid": "863903", 
+      "GANEid": 61213, 
+      "periods": [
+        "Late Antique", 
+        "Persian-Medieval Caucasus", 
+        "Abassid Middle East", 
+        "Early Medieval Caucasus", 
+        "Middle Byzantine", 
+        "Khwarezmian Middle East", 
+        "Crusader/Byzantine/Seljuq Middle East", 
+        "1200 BC Middle East", 
+        "Perso-Ottoman-Russian Caucasus", 
+        "1500 AD Middle East", 
+        "Late Ottoman Empire", 
+        "Modern Middle East"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.3, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": [
+        "Tpilisi", 
+        "T'bilisi"
+      ], 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BX9", 
+        "accuracy": "2"
+      }, 
+      "minDate": 300
+    }
+  }, 
+  "62366": {
+    "62366": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1694)", 
+        "index-page": 1694, 
+        "index-volume": 3
+      }, 
+      "title": "Tiphilis", 
+      "maxDate": 1200, 
+      "title-languages": [
+        {
+          "iso": "grc", 
+          "language": "[Ancient] Greek", 
+          "iso_stand": true
+        }
+      ], 
+      "pid": "863903", 
+      "GANEid": 62366, 
+      "periods": [
+        "Late Antique", 
+        "Early Medieval Caucasus"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.4, 
+          41.4
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": false, 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BVII16", 
+        "accuracy": "2"
+      }, 
+      "minDate": 300
+    }
+  }, 
+  "61215": {
+    "61215": {
+      "externalURIs": false, 
+      "placeURI": "http://pleiades.stoa.org/places/863903", 
+      "reference": {
+        "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 3, p. 1662)", 
+        "index-page": 1662, 
+        "index-volume": 3
+      }, 
+      "title": "\u1e6cbilisi", 
+      "maxDate": 2000, 
+      "title-languages": false, 
+      "pid": "863903", 
+      "GANEid": 61215, 
+      "periods": [
+        "Late Antique", 
+        "Abassid Middle East", 
+        "Middle Byzantine", 
+        "Khwarezmian Middle East", 
+        "Crusader/Byzantine/Seljuq Middle East", 
+        "1200 BC Middle East", 
+        "1500 AD Middle East", 
+        "Modern Middle East"
+      ], 
+      "extent": {
+        "type": "Point", 
+        "coordinates": [
+          44.5, 
+          41.3
+        ]
+      }, 
+      "authors": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig, F. Deblauwe, E. Kansa", 
+      "nameTransliterated": false, 
+      "creators": "B. Siewert-Mayer, H. Kopp, W. R\u00f6llig", 
+      "main-map": {
+        "map": "BX9", 
+        "accuracy": "2"
+      }, 
+      "minDate": 300
+    }
+  }
+}

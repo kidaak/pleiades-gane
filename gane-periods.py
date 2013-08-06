@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
     opts, args = parser.parse_args(sys.argv[1:])
     filename = opts.filename
-    f = open(filename, 'rb')
+    f = open(filename)
     rows = list(csv.reader(f))
     site = app['plone']
     setup_cmfuid(site)
