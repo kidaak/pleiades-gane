@@ -36,7 +36,6 @@ DIDKEY = 'OBJECTID'
 def is_high_quality(ob):
     return not(
         ob.getId().startswith(
-        'darmc') or ob.getId().startswith(
         'batlas') or ob.getId().startswith(
         'undeterm') or ob.getId().startswith(
         'gane') )
@@ -199,12 +198,15 @@ def main(context, gane_tree, period_map):
             
                 place.setModificationDate(now)
                 repo.save(place, MESSAGE)
-                #wftool.doActionFor(location, action='submit')
-                #wftool.doActionFor(location, action='publish')
-                place.reindexObject()
+            
+                LOG.info("Created and archived Place, GANE id: %s, Pleiades id: %s", pk, pid)
+            
+                wftool.doActionFor(place, action='submit')
+                LOG.info("Submitted Place, GANE id: %s, Pleiades id: %s", pk, pid)
+            
+                wftool.doActionFor(ob, action='publish')
+                LOG.info("Published Place, GANE id: %s, Pleiades id: %s", pk, pid)
                 
-                LOG.info("Created gname GANE place %s", pid)
-
             # New name
             for gid, gname, rating in [(pk, primary, 3)] + [
                     (k, v, 2) for k, v in cluster.items() ]:
@@ -302,12 +304,14 @@ def main(context, gane_tree, period_map):
                     rate(ob, "fdeblauwe", rating)
                     rate(ob, "ekansa", rating)
 
-                    #wftool.doActionFor(ob, action='submit')
-                    #wftool.doActionFor(ob, action='publish')
-                
-                    ob.reindexObject()
-
-                    LOG.info("Created Name. GANE id: %s, Pleiades id: %s", gid, nid)
+                    LOG.info("Created and archived Name, GANE id: %s, Pleiades id: %s", gid, pid)
+            
+                    wftool.doActionFor(ob, action='submit')
+                    LOG.info("Submitted Name, GANE id: %s, Pleiades id: %s", gid, pid)
+            
+                    wftool.doActionFor(ob, action='publish')
+                    LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
+                    #ob.reindexObject()
 
             # Locations
 
@@ -433,15 +437,17 @@ def main(context, gane_tree, period_map):
             now = DateTime(datetime.datetime.now().isoformat())
             ob.setModificationDate(now)
             repo.save(ob, MESSAGE)
-            #wftool.doActionFor(ob, action='submit')
-            #wftool.doActionFor(ob, action='publish')
-            ob.reindexObject()
+            
+            LOG.info("Created and archived Location, GANE id: %s, Pleiades id: %s", gid, pid)
+            
+            wftool.doActionFor(ob, action='submit')
+            LOG.info("Submitted Location, GANE id: %s, Pleiades id: %s", gid, pid)
+            
+            wftool.doActionFor(ob, action='publish')
+            LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
+            #ob.reindexObject()
 
-            LOG.info("Created gname (Location) GANE %s", nid)
-
-            place.setModificationDate(now)
-            repo.save(place, MESSAGE)
-            place.reindexObject()
+        place.reindexObject()
 
     except Exception, e:
         raise
