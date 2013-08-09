@@ -144,6 +144,7 @@ def main(context, gane_tree, period_map):
             if pid:
                 place = places[pid]
                 action = 'append'
+                place_citations = []
                 
                 LOG.info("Pid: %s, action: %s", pid, action)
 
@@ -172,7 +173,7 @@ def main(context, gane_tree, period_map):
                 place = places[pid]
                 action = 'create'
             
-                citations= [dict(
+                place_citations = [dict(
                     identifier="http://www.worldcat.org/oclc/32624915",
                     range="TAVO Index (Vol. %s, p. %s)" % (
                         gname['reference']['index-volume'],
@@ -184,15 +185,16 @@ def main(context, gane_tree, period_map):
                         label = 'Wikipedia "%s."' % link.get('title')
                     else:
                         label = link.get('title', "Untitled GANE Link")
-                    citations.append(dict(
+                    place_citations.append(dict(
                         identifier=link['uri'],
                         range=label,
                         type="seeAlso",
                         ))
-
+                
                 field = place.getField('referenceCitations')
-                field.resize(len(citations), place)
-                place.setReferenceCitations(citations)
+                field.resize(len(place_citations), place)
+                place.setReferenceCitations(place_citations)
+                place_citations = []
 
                 now = DateTime(datetime.datetime.now().isoformat())
             
@@ -206,7 +208,7 @@ def main(context, gane_tree, period_map):
             
                 wftool.doActionFor(ob, action='publish')
                 LOG.info("Published Place, GANE id: %s, Pleiades id: %s", pk, pid)
-                
+            
             # New name
             for gid, gname, rating in [(pk, primary, 3)] + [
                     (k, v, 2) for k, v in cluster.items() ]:
@@ -266,8 +268,8 @@ def main(context, gane_tree, period_map):
                     ob = place[nid]
 
                     atts = [dict(
-                        confidence='confident', 
-                        timePeriod=period_map[p] # utils.normalizeString(p) 
+                        confidence='confident',
+                        timePeriod=period_map[p]
                         ) for p in gname.get('periods', []) if p in period_map]
                     field = ob.getField('attestations')
                     field.resize(len(atts), ob)
@@ -280,23 +282,29 @@ def main(context, gane_tree, period_map):
                             gname['reference']['index-page']),
                         type="cites")]
 
-                    if gid != pk:
-                        # Skip external links that have already been saved
-                        # on the parent place
-
-                        for link in gname.get('externalURIs') or []:
-                            if "wikipedia" in link['uri']:
+                    # Possible Wikipedia and other links
+                    for link in gname.get('externalURIs') or []:
+                    
+                        if "wikipedia" in link['uri']:
+                            import pdb; pdb.set_trace()
+                        
+                        if ("wikipedia" in link['uri'] and 
+                            link['uri'] not in [c['identifier'] for c in place_citations]):
                                 label = 'Wikipedia "%s."' % link.get('title')
-                            else:
-                                label = link.get('title', "Untitled GANE Link")
+                                place_citations.append(dict(
+                                    identifier=link['uri'],
+                                    range=label,
+                                    type="seeAlso"))
+                        else:
+                            label = link.get('title', "Untitled GANE Link")
                             citations.append(dict(
                                 identifier=link['uri'],
                                 range=label,
                                 type="seeAlso"))
 
-                        field = ob.getField('referenceCitations')
-                        field.resize(len(citations), ob)
-                        ob.setReferenceCitations(citations)
+                    field = ob.getField('referenceCitations')
+                    field.resize(len(citations), ob)
+                    ob.setReferenceCitations(citations)
 
                     now = DateTime(datetime.datetime.now().isoformat())
                     ob.setModificationDate(now)
@@ -311,7 +319,15 @@ def main(context, gane_tree, period_map):
             
                     wftool.doActionFor(ob, action='publish')
                     LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
-                    #ob.reindexObject()
+
+                    if len(place_citations) > 0:
+                        field = place.getField('referenceCitations')
+                        prev_citations = place.getReferenceCitations()
+                        place_citations.extend(prev_citations)
+                        field.resize(len(place_citations), place)
+                        place.setReferenceCitations(place_citations)
+                        place.reindexObject()
+                        LOG.info("Updated Place reference citations, GANE id: %s, Pleiades id: %s", gid, pid)
 
             # Locations
 
@@ -416,23 +432,25 @@ def main(context, gane_tree, period_map):
                     gname['reference']['index-page'] ),
                 type="cites" )]
 
-            if gid != pk:
-                # Skip external links that have already been saved
-                # on the parent place
-
-                for link in gname.get('externalURIs') or []:
-                    if "wikipedia" in link['uri']:
-                        label = 'Wikipedia "%s."' % link.get('title')
-                    else:
-                        label = link.get('title', "Untitled GANE Link")
+            # Possible Wikipedia and other links
+            for link in gname.get('externalURIs') or []:
+                if ("wikipedia" in link['uri'] and 
+                    link['uri'] not in [c['identifier'] for c in place_citations]):
+                    label = 'Wikipedia "%s."' % link.get('title')
+                    place_citations.append(dict(
+                        identifier=link['uri'],
+                        range=label,
+                        type="seeAlso"))
+                else:
+                    label = link.get('title', "Untitled GANE Link")
                     citations.append(dict(
                         identifier=link['uri'],
                         range=label,
                         type="seeAlso"))
 
-                field = ob.getField('referenceCitations')
-                field.resize(len(citations), ob)
-                ob.setReferenceCitations(citations)
+            field = ob.getField('referenceCitations')
+            field.resize(len(citations), ob)
+            ob.setReferenceCitations(citations)
 
             now = DateTime(datetime.datetime.now().isoformat())
             ob.setModificationDate(now)
@@ -446,9 +464,7 @@ def main(context, gane_tree, period_map):
             wftool.doActionFor(ob, action='publish')
             LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
             #ob.reindexObject()
-
-        place.reindexObject()
-
+            
     except Exception, e:
         raise
         
