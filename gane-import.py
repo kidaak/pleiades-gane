@@ -285,9 +285,6 @@ def main(context, gane_tree, period_map):
                     # Possible Wikipedia and other links
                     for link in gname.get('externalURIs') or []:
                     
-                        if "wikipedia" in link['uri']:
-                            import pdb; pdb.set_trace()
-                        
                         if ("wikipedia" in link['uri'] and 
                             link['uri'] not in [c['identifier'] for c in place_citations]):
                                 label = 'Wikipedia "%s."' % link.get('title')
