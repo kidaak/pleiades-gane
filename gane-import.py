@@ -125,12 +125,11 @@ def main(context, gane_tree, period_map):
         }
 
     import transaction
-    savepoint = transaction.savepoint()
-    try:
 
-        # Proper language codes
-
-        for pk, cluster in gane_tree.items():
+    for pk, cluster in gane_tree.items():
+            
+        savepoint = transaction.savepoint()
+        try:
             
             if not pk in cluster:
                 LOG.warn("Primary not found, skipping cluster, Pk: %s", pk)
@@ -462,13 +461,11 @@ def main(context, gane_tree, period_map):
             LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
             #ob.reindexObject()
             
-    except Exception, e:
-        raise
+        transaction.commit()
         
-        #savepoint.rollback()
-        #LOG.error("Rolled back after catching exception: %s" % e)
- 
-    transaction.commit()
+        except Exception, e:
+            savepoint.rollback()
+            LOG.error("Rolled back after catching exception: %s in %s" % (e, pk))
 
 if __name__ == '__main__':
     # Zopectl doesn't handle command line arguments well, necessitating quoting
