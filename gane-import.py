@@ -126,7 +126,7 @@ def main(context, gane_tree, period_map):
 
     import transaction
 
-    for pk, cluster in gane_tree.items():
+    for i, (pk, cluster) in enumerate(gane_tree.items()):
         
         savepoint = transaction.savepoint()
         try:
@@ -138,7 +138,7 @@ def main(context, gane_tree, period_map):
             primary = cluster.pop(pk)
             pid = primary['pid']
 
-            LOG.info("Importing cluster, Pk: %s, Pid: %s, num items: %s", pk, pid, len(cluster))
+            LOG.info("Importing cluster, i: %s, Pk: %s, Pid: %s, num items: %s", i, pk, pid, len(cluster))
 
             if pid:
                 place = places[pid]
@@ -461,11 +461,15 @@ def main(context, gane_tree, period_map):
             LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
             #ob.reindexObject()
             
-            transaction.commit()
-        
         except Exception, e:
             savepoint.rollback()
-            LOG.error("Rolled back after catching exception: %s in %s" % (e, pk))
+            LOG.exception("Rolled back after catching exception: %s in %s" % (e, pk))
+
+        if i % 100 == 0:
+            transaction.commit()
+            LOG.info("Subtransaction committed at %s", i)
+
+    transaction.commit()
 
 if __name__ == '__main__':
     # Zopectl doesn't handle command line arguments well, necessitating quoting
