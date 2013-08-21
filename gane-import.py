@@ -127,7 +127,7 @@ def main(context, gane_tree, period_map):
     import transaction
 
     for pk, cluster in gane_tree.items():
-            
+        
         savepoint = transaction.savepoint()
         try:
             
@@ -461,7 +461,7 @@ def main(context, gane_tree, period_map):
             LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
             #ob.reindexObject()
             
-        transaction.commit()
+            transaction.commit()
         
         except Exception, e:
             savepoint.rollback()
