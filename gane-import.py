@@ -269,7 +269,8 @@ def main(context, gane_tree, period_map):
                     atts = [dict(
                         confidence='confident',
                         timePeriod=period_map[p]
-                        ) for p in gname.get('periods', []) if p in period_map]
+                        ) for p in (gname.get('periods') or []) if p in period_map]
+                        
                     field = ob.getField('attestations')
                     field.resize(len(atts), ob)
                     ob.setAttestations(atts)
@@ -345,7 +346,7 @@ def main(context, gane_tree, period_map):
                 continue
 
             all_periods = set(
-                chain(*[n['periods'] for n in [primary] + cluster.values()]))
+                chain(*[(n.get('periods') or []) for n in [primary] + cluster.values()]))
 
             accuracy, gid, gname = points[0]
 
