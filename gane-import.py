@@ -17,6 +17,8 @@ from zope.annotation.interfaces import IAnnotations
 
 from pleiades.bulkup import secure, setup_cmfuid
 from pleiades.capgrids import box
+from pleiades.dump import getSite, spoofRequest
+
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
@@ -500,7 +502,10 @@ if __name__ == '__main__':
         (title, tid) for title, tid, start, stop, area, note, other 
         in rows ])
 
-    site = app['plone']
+    app = spoofRequest(app)
+    site = getSite(app)
+
+    # site = app['plone']
     setup_cmfuid(site)
     secure(site, opts.user or 'admin')
     
