@@ -207,7 +207,7 @@ def main(context, gane_tree, period_map):
                 wftool.doActionFor(place, action='submit')
                 LOG.info("Submitted Place, GANE id: %s, Pleiades id: %s", pk, pid)
             
-                wftool.doActionFor(ob, action='publish')
+                wftool.doActionFor(place, action='publish')
                 LOG.info("Published Place, GANE id: %s, Pleiades id: %s", pk, pid)
             
             # New name
@@ -385,7 +385,6 @@ def main(context, gane_tree, period_map):
                 description="Approximate location from the TAVO index",
                 text=text,
                 featureType=placeTypes,
-                # geometry=geometry,
                 creators=creators,
                 contributors=contributors,
                 initialProvenance='TAVO Index'
@@ -411,14 +410,13 @@ def main(context, gane_tree, period_map):
                     LOG.warn("Grid location of %s/%s unset", pid, lid)
 
             # TODO: accuracy assessment
-            # positional accuracy
             mdid = "tavo-%s" % accuracy
             metadataDoc = context['features']['metadata'][mdid]
             ob.addReference(metadataDoc, 'location_accuracy')
 
             atts = [dict(
                 confidence='confident', 
-                timePeriod=period_map[p] # utils.normalizeString(p) 
+                timePeriod=period_map[p]
                 ) for p in all_periods if p in period_map]
             field = ob.getField('attestations')
             field.resize(len(atts), ob)
@@ -462,7 +460,6 @@ def main(context, gane_tree, period_map):
             
             wftool.doActionFor(ob, action='publish')
             LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
-            #ob.reindexObject()
             
         except Exception, e:
             savepoint.rollback()
@@ -505,7 +502,6 @@ if __name__ == '__main__':
     app = spoofRequest(app)
     site = getSite(app)
 
-    # site = app['plone']
     setup_cmfuid(site)
     secure(site, opts.user or 'admin')
     

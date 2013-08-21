@@ -15382,7 +15382,7 @@
   "25815": {
     "25815": {
       "externalURIs": false, 
-      "placeURI": "http://pleiades.stoa.org/places/687928", 
+      "placeURI": "http://pleiades.stoa.org/places/687928/hierosolyma", 
       "reference": {
         "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 2, p. 701)", 
         "index-page": 701, 
@@ -15397,7 +15397,7 @@
           "iso_stand": true
         }
       ], 
-      "pid": "hierosolyma", 
+      "pid": "687928", 
       "GANEid": 25815, 
       "periods": [
         "Achaemenid Middle East", 
@@ -30394,7 +30394,7 @@
   "29094": {
     "29094": {
       "externalURIs": false, 
-      "placeURI": "http://pleiades.stoa.org/places/687928", 
+      "placeURI": "http://pleiades.stoa.org/places/687928/ierusalem", 
       "reference": {
         "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 2, p. 791)", 
         "index-page": 791, 
@@ -30409,7 +30409,7 @@
           "iso_stand": true
         }
       ], 
-      "pid": "ierusalem", 
+      "pid": "687928", 
       "GANEid": 29094, 
       "periods": [
         "Hellenistic-Roman Early Empire", 
@@ -48540,7 +48540,7 @@
   "12948": {
     "12948": {
       "externalURIs": false, 
-      "placeURI": "http://pleiades.stoa.org/places/687928", 
+      "placeURI": "http://pleiades.stoa.org/places/687928/col-aelia-capitolina", 
       "reference": {
         "text": "A place name in the T\u00fcbingen Atlas Index (Vol. 1, p. 351)", 
         "index-page": 351, 
@@ -48555,7 +48555,7 @@
           "iso_stand": true
         }
       ], 
-      "pid": "col-aelia-capitolina", 
+      "pid": "687928", 
       "GANEid": 12948, 
       "periods": [
         "Roman Early Empire"
