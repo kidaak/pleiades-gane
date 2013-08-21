@@ -136,7 +136,7 @@ def main(context, gane_tree, period_map):
                 continue
             
             primary = cluster.pop(pk)
-            pid = primary['pid']
+            pid = primary.get('pid')
 
             LOG.info("Importing cluster, i: %s, Pk: %s, Pid: %s, num items: %s", i, pk, pid, len(cluster))
 
