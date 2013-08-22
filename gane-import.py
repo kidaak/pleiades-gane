@@ -130,6 +130,12 @@ def main(context, gane_tree, period_map):
 
     for i, (pk, cluster) in enumerate(gane_tree.items()):
         
+        # Because 'continue' is used below to skip through the loop, we need
+        # to check at the top to see if it's time to batch commit.
+        if i > 1 and (i-1) % 100 == 0:
+            transaction.commit()
+            LOG.info("Subtransaction committed at %s", i)
+
         savepoint = transaction.savepoint()
         try:
             
@@ -366,8 +372,6 @@ def main(context, gane_tree, period_map):
                 LOG.info("No extent found, continuing...")
                 continue
                 
-            # geometry = "%s:%s" % (extent['type'], extent['coordinates'])
-            
             # find the capgrid containing this point
             if extent['type'] == 'Point':
                 b = extent['coordinates']
@@ -413,7 +417,6 @@ def main(context, gane_tree, period_map):
                 else:
                     LOG.warn("Grid location of %s/%s unset", pid, lid)
 
-            # TODO: accuracy assessment
             mdid = "tavo-%s" % accuracy
             metadataDoc = context['features']['metadata'][mdid]
             ob.addReference(metadataDoc, 'location_accuracy')
@@ -468,10 +471,6 @@ def main(context, gane_tree, period_map):
         except Exception, e:
             savepoint.rollback()
             LOG.exception("Rolled back after catching exception: %s in %s" % (e, pk))
-        else:
-            if i % 100 == 0:
-                transaction.commit()
-                LOG.info("Subtransaction committed at %s", i)
 
     transaction.commit()
 
