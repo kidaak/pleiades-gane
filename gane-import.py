@@ -369,10 +369,14 @@ def main(context, gane_tree, period_map):
             # geometry = "%s:%s" % (extent['type'], extent['coordinates'])
             
             # find the capgrid containing this point
-            b = extent['coordinates']
-            b[0] += 0.05
-            b[1] += 0.05
-            b = b + b 
+            if extent['type'] == 'Point':
+                b = extent['coordinates']
+                b[0] += 0.05
+                b[1] += 0.05
+                b = b + b
+            elif extent['type'] == 'Polygon':
+                xs, ys = zip(*extent['coordinates'])
+                b = min(xs), min(ys), max(xs), max(ys)
             
             hits = list(cap_tree.likely_intersection(b))
 
@@ -464,10 +468,10 @@ def main(context, gane_tree, period_map):
         except Exception, e:
             savepoint.rollback()
             LOG.exception("Rolled back after catching exception: %s in %s" % (e, pk))
-
-        if i % 100 == 0:
-            transaction.commit()
-            LOG.info("Subtransaction committed at %s", i)
+        else:
+            if i % 100 == 0:
+                transaction.commit()
+                LOG.info("Subtransaction committed at %s", i)
 
     transaction.commit()
 
