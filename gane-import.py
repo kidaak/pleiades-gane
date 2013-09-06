@@ -323,16 +323,18 @@ def main(context, gane_tree, period_map):
                     LOG.info("Submitted Name, GANE id: %s, Pleiades id: %s", gid, pid)
             
                     wftool.doActionFor(ob, action='publish')
-                    LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
+                    LOG.info("Published Name, GANE id: %s, Pleiades id: %s", gid, pid)
 
-                    if len(place_citations) > 0:
-                        field = place.getField('referenceCitations')
-                        prev_citations = place.getReferenceCitations()
-                        place_citations.extend(prev_citations)
-                        field.resize(len(place_citations), place)
-                        place.setReferenceCitations(place_citations)
-                        place.reindexObject()
-                        LOG.info("Updated Place reference citations, GANE id: %s, Pleiades id: %s", gid, pid)
+                    field = place.getField('referenceCitations')
+                    prev_citations = place.getReferenceCitations()
+                    place_citations.extend(prev_citations)
+
+                    unique_place_citation_items = set([tuple(c.items()) for c in place_citations])
+                    place_citations = [dict(v) for v in unique_place_citation_items]
+
+                    field.resize(len(place_citations), place)
+                    place.setReferenceCitations(place_citations)
+                    LOG.info("Updated Place reference citations, GANE id: %s, Pleiades id: %s", gid, pid)
 
             # Locations
 
@@ -468,6 +470,8 @@ def main(context, gane_tree, period_map):
             wftool.doActionFor(ob, action='publish')
             LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
             
+            place.reindexObject()
+
         except Exception, e:
             savepoint.rollback()
             LOG.exception("Rolled back after catching exception: %s in %s" % (e, pk))
