@@ -86,6 +86,7 @@ def main(context, gane_tree, period_map):
     wftool = getToolByName(context, 'portal_workflow')
     utils = getToolByName(context, 'plone_utils')
     places = context['places']
+    errata = context['errata']
 
     # Language adjustment
     lang_map = {
@@ -148,8 +149,17 @@ def main(context, gane_tree, period_map):
 
             LOG.info("Importing cluster, i: %s, Pk: %s, Pid: %s, num items: %s", i, pk, pid, len(cluster))
 
-            if pid:
+            if pid and pid in places:
+                # Handle links.
                 place = places[pid]
+                
+                if hasattr(place, 'getRemoteUrl'):
+                    url = place.getRemoteUrl().rstrip('/')
+                    linked_pid = url.split('/')[-1]
+                    LOG.info("Following link from %s to %s for Pk: %s", pid, linked_pid, pk)
+                    pid = linked_pid
+                    place = places[pid]
+
                 action = 'append'
                 place_citations = []
                 
@@ -216,6 +226,11 @@ def main(context, gane_tree, period_map):
                 wftool.doActionFor(place, action='publish')
                 LOG.info("Published Place, GANE id: %s, Pleiades id: %s", pk, pid)
             
+            else:
+                savepoint.rollback()
+                LOG.error("No such place %s for %s", pid, pk)
+                continue
+
             # New name
             for gid, gname, rating in [(pk, primary, 3)] + [
                     (k, v, 2) for k, v in cluster.items() ]:
@@ -348,7 +363,7 @@ def main(context, gane_tree, period_map):
             # Let's take the most accurate coordinates and roll all the
             # periods into one Location.
             points = sorted(filter(
-                        lambda t: t[0] in '01234567' and t[2].get('extent'),
+                        lambda t: (t[0] or '0') in '01234567' and t[2].get('extent'),
                         [(get_accuracy(v), k, v) for 
                             k, v in [(pk, primary)] + cluster.items()] ))
             if len(points) < 1:
@@ -362,7 +377,7 @@ def main(context, gane_tree, period_map):
 
             text = "GANE OBJECT %s\nMap: %s\nCorner Coordinates: %s\n" % (
                 gname['GANEid'],
-                gname['main-map'].get('map'),
+                (gname.get('main-map') or {}).get('map'),
                 gname.get('extent', {'coordinates': None}).get('coordinates'))
 
             rating = 1
@@ -375,16 +390,21 @@ def main(context, gane_tree, period_map):
                 continue
                 
             # find the capgrid containing this point
+            bounds = None
             if extent['type'] == 'Point':
                 b = extent['coordinates']
                 b[0] += 0.05
                 b[1] += 0.05
-                b = b + b
+                bounds = b + b
             elif extent['type'] == 'Polygon':
-                xs, ys = zip(*extent['coordinates'])
-                b = min(xs), min(ys), max(xs), max(ys)
-            
-            hits = list(cap_tree.likely_intersection(b))
+                # Fix busted GeoJSON if necessary
+                coords = extent['coordinates']
+                if isinstance(coords[0][0], (int, float)):
+                    extent['coordinates'] = [coords]
+                xs, ys = zip(*extent['coordinates'][0])
+                bounds = min(xs), min(ys), max(xs), max(ys)
+
+            hits = list(cap_tree.likely_intersection(bounds))
 
             placeTypes = ['settlement']
 
@@ -409,7 +429,9 @@ def main(context, gane_tree, period_map):
                     mapnum, grid = mapgrid.split("/")
                     b = box(mapnum, grid)
                     hit_area = (b[2]-b[0])*(b[3]-b[1])
-                    x, y = extent['coordinates']
+                    minx, miny, maxx, maxy = bounds
+                    x = (minx + maxx)/2.0
+                    y = (minx + maxy)/2.0
                     if b[0] <= x <= b[2] and b[1] <= y <= b[3] and hit_area < area:
                         area = hit_area
                         val = mapgrid
@@ -471,7 +493,7 @@ def main(context, gane_tree, period_map):
             LOG.info("Published Location, GANE id: %s, Pleiades id: %s", gid, pid)
             
             place.reindexObject()
-
+        
         except Exception, e:
             savepoint.rollback()
             LOG.exception("Rolled back after catching exception: %s in %s" % (e, pk))
