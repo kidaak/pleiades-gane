@@ -363,7 +363,7 @@ def main(context, gane_tree, period_map):
             # Let's take the most accurate coordinates and roll all the
             # periods into one Location.
             points = sorted(filter(
-                        lambda t: (t[0] or '0') in '01234567' and t[2].get('extent'),
+                        lambda t: (t[0] or '8') in '01234567' and t[2].get('extent'),
                         [(get_accuracy(v), k, v) for 
                             k, v in [(pk, primary)] + cluster.items()] ))
             if len(points) < 1:
@@ -440,10 +440,11 @@ def main(context, gane_tree, period_map):
                     ob.setLocation('http://atlantides.org/capgrids/' + val)
                 else:
                     LOG.warn("Grid location of %s/%s unset", pid, lid)
-
-            mdid = "tavo-%s" % accuracy
-            metadataDoc = context['features']['metadata'][mdid]
-            ob.addReference(metadataDoc, 'location_accuracy')
+            
+            if accuracy:
+                mdid = "tavo-%s" % accuracy
+                metadataDoc = context['features']['metadata'][mdid]
+                ob.addReference(metadataDoc, 'location_accuracy')
 
             atts = [dict(
                 confidence='confident', 
